@@ -14,7 +14,7 @@ option(INCLUDE_METALKIT_EXTENSION
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 project(
-    CMakeMetalCPP
+    cmake-metal-cpp
     VERSION 1.0.0
     DESCRIPTION ""
     LANGUAGES CXX)
@@ -72,7 +72,7 @@ if(MAKE_METAL_SINGLE_HEADER)
     endif()
 endif()
 
-add_library(METAL_CPP "${CMAKE_CURRENT_LIST_DIR}/metal.cpp")
+add_library(metal-cpp "${CMAKE_CURRENT_LIST_DIR}/metal.cpp")
 
 list(APPEND TARGET_LINK_LIBRARIES "-framework Metal" "-framework Foundation"
      "-framework QuartzCore")
@@ -114,5 +114,5 @@ else(NOT ${MAKE_METAL_SINGLE_HEADER})
 
 endif()
 
-target_include_directories(METAL_CPP PUBLIC ${METAL_CPP_INCLUDE_DIRS})
-target_link_libraries(METAL_CPP ${TARGET_LINK_LIBRARIES})
+target_include_directories(metal-cpp PUBLIC ${METAL_CPP_INCLUDE_DIRS})
+target_link_libraries(metal-cpp ${TARGET_LINK_LIBRARIES})
