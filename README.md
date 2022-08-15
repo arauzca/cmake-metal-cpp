@@ -1,4 +1,4 @@
-# [<img src="/assets/cmake.svg" style="height:45px; float:left; margin-right:2px" />](https://cmake.org "CMake") cmake metal-cpp
+# [<img src="/assets/cmake.svg" style="height:30px;" />](https://cmake.org "CMake") cmake metal-cpp
 
 ## About
 
@@ -19,7 +19,7 @@
 add_subdirectory(cmake-metal-cpp)
 ```
 
-- Add the  compile definitions and link the library provided by **cmake-metal-cpp**. For instahce if you have an executable `my-target`:
+- Add the  compile definitions and link the library provided by **cmake-metal-cpp**. For instance if you have an executable `my-target`:
 
 ```cmake
 target_compile_definitions(my-target PUBLIC ${METAL_CPP_COMPILE_DEFS})
