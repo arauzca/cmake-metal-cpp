@@ -13,6 +13,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (C) 2022 Carlos Arauz.
+ *
  */
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,8 +26,10 @@
 
 #pragma once
 
+#ifndef SINGLE_METAL_HEADER
 #include <Foundation/NSObject.hpp>
 #include <Foundation/NSPrivate.hpp>
+#endif
 #include "AppKitPrivate.hpp"
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------

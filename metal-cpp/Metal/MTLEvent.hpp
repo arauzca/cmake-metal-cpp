@@ -16,6 +16,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+// Modifications copyright (C) 2022 Carlos Arauz.
+//
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #pragma once
@@ -24,7 +26,9 @@
 #include "MTLHeaderBridge.hpp"
 #include "MTLPrivate.hpp"
 
+#ifndef SINGLE_METAL_HEADER
 #include <Foundation/Foundation.hpp>
+#endif
 
 #include "MTLEvent.hpp"
 
