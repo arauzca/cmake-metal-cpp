@@ -13,9 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Modifications copyright (C) 2022 Carlos Arauz.
- *
  */
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -30,11 +27,9 @@
 
 #include "MetalKitPrivate.hpp"
 
-#ifndef SINGLE_METAL_HEADER
 #include <AppKit/AppKit.hpp>
 #include <Metal/Metal.hpp>
 #include <QuartzCore/QuartzCore.hpp>
-#endif
 
 #include <CoreGraphics/CGColorSpace.h>
 

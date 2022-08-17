@@ -13,9 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Modifications copyright (C) 2022 Carlos Arauz.
- *
  */
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,9 +26,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #include "AppKitPrivate.hpp"
-#ifndef SINGLE_METAL_HEADER
 #include <Foundation/NSObject.hpp>
-#endif
 #include <CoreGraphics/CGGeometry.h>
 
 namespace NS

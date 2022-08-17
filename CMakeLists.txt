@@ -47,11 +47,13 @@ if(MAKE_METAL_SINGLE_HEADER)
              "${METAL_CPP_DIR}/Metal/Metal.hpp")
 
         if(INCLUDE_APPKIT_EXTENSION)
-            list(APPEND HEADERS "${METAL_CPP_EXTENSIONS_DIR}/AppKit/AppKit.hpp")
+            file(COPY "${METAL_CPP_EXTENSIONS_DIR}/AppKit" DESTINATION "${METAL_CPP_DIR}/")
+            list(APPEND HEADERS "${METAL_CPP_DIR}/AppKit/AppKit.hpp")
         endif()
-
+            
         if(INCLUDE_METALKIT_EXTENSION)
-            list(APPEND HEADERS "${METAL_CPP_EXTENSIONS_DIR}/MetalKit/MetalKit.hpp")
+            file(COPY "${METAL_CPP_EXTENSIONS_DIR}/MetalKit" DESTINATION "${METAL_CPP_DIR}/")
+            list(APPEND HEADERS "${METAL_CPP_DIR}/MetalKit/MetalKit.hpp")
         endif()
 
         # Run the python script.
@@ -60,15 +62,6 @@ if(MAKE_METAL_SINGLE_HEADER)
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             RESULT_VARIABLE EXIT_CODE
             OUTPUT_QUIET)
-
-        if(NOT ${EXIT_CODE} EQUAL 0)
-            message(
-                FATAL_ERROR
-                    "An error has ocurred: the script did not successfully complete.")
-        else()
-            message(
-                STATUS "Single header created: ${METAL_CPP_DIR}/SingleHeader/Metal.hpp")
-        endif()
     endif()
 endif()
 
@@ -89,29 +82,39 @@ if(INCLUDE_METALKIT_EXTENSION)
     list(APPEND TARGET_LINK_LIBRARIES "-framework MetalKit")
 endif()
 
-unset(METAL_CPP_COMPILE_DEFS CACHE)
-
 if(${MAKE_METAL_SINGLE_HEADER} AND EXISTS "${METAL_CPP_DIR}/SingleHeader/Metal.hpp")
-    # This cache variable needs to be added to the compile definitions of the project
-    # which depends on Metal-cpp.
-    set(METAL_CPP_COMPILE_DEFS
-        SINGLE_METAL_HEADER
-        CACHE STRING "")
-
     set(METAL_CPP_INCLUDE_DIRS "${METAL_CPP_DIR}/SingleHeader")
 
-else(NOT ${MAKE_METAL_SINGLE_HEADER})
-    # This cache variable needs to be added to the compile definitions of the project
-    # which depends on Metal-cpp.
-    set(METAL_CPP_COMPILE_DEFS
-        ${INCLUDE_EXTENSION}
-        CACHE STRING "")
+    # Remove unnecessary  headers.
+    execute_process(
+        COMMAND python3 "${CMAKE_CURRENT_LIST_DIR}/scripts/RemoveUselessImports.py" "${METAL_CPP_DIR}/SingleHeader/Metal.hpp"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        RESULT_VARIABLE EXIT_CODE2
+        OUTPUT_QUIET)
 
+    if(NOT ${EXIT_CODE1} EQUAL 0 OR NOT ${EXIT_CODE2} EQUAL 0)
+        message(
+            FATAL_ERROR
+                "An error has ocurred: the script did not successfully complete.")
+    else()
+        message(
+            STATUS "Single header created: ${METAL_CPP_DIR}/SingleHeader/Metal.hpp")
+    endif()
+
+else(NOT ${MAKE_METAL_SINGLE_HEADER})
     list(APPEND METAL_CPP_INCLUDE_DIRS ${METAL_CPP_DIR})
     if(INCLUDE_APPKIT_EXTENSION OR INCLUDE_METALKIT_EXTENSION)
         list(APPEND METAL_CPP_INCLUDE_DIRS ${METAL_CPP_EXTENSIONS_DIR})
     endif()
 
+endif()
+
+if(EXISTS "${METAL_CPP_DIR}/AppKit")
+    file(REMOVE_RECURSE "${METAL_CPP_DIR}/AppKit")
+endif()
+
+if(EXISTS "${METAL_CPP_DIR}/MetalKit")
+    file(REMOVE_RECURSE "${METAL_CPP_DIR}/MetalKit")
 endif()
 
 target_include_directories(metal-cpp PUBLIC ${METAL_CPP_INCLUDE_DIRS})
