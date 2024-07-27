@@ -2,7 +2,7 @@
 //
 // Metal/MTLIOCompressor.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@
 
 namespace MTL
 {
+using IOCompresionContext=void*;
+
 _MTL_ENUM(NS::Integer, IOCompressionStatus) {
     IOCompressionStatusComplete = 0,
     IOCompressionStatusError = 1,
@@ -36,17 +38,19 @@ _MTL_ENUM(NS::Integer, IOCompressionStatus) {
 
 size_t IOCompressionContextDefaultChunkSize();
 
-void* IOCreateCompressionContext(const char* path, IOCompressionMethod type, size_t chunkSize);
+IOCompresionContext IOCreateCompressionContext(const char* path, IOCompressionMethod type, size_t chunkSize);
 
-void IOCompressionContextAppendData(void* context, const void* data, size_t size);
+void IOCompressionContextAppendData(IOCompresionContext context, const void* data, size_t size);
 
-IOCompressionStatus IOFlushAndDestroyCompressionContext(void* context);
+IOCompressionStatus IOFlushAndDestroyCompressionContext(IOCompresionContext context);
 
 }
 
 #if defined(MTL_PRIVATE_IMPLEMENTATION)
 
 namespace MTL::Private {
+
+MTL_DEF_FUNC(MTLIOCompressionContextDefaultChunkSize, size_t (*)(void));
 
 MTL_DEF_FUNC( MTLIOCreateCompressionContext, void* (*)(const char*, MTL::IOCompressionMethod, size_t) );
 
@@ -58,7 +62,7 @@ MTL_DEF_FUNC( MTLIOFlushAndDestroyCompressionContext, MTL::IOCompressionStatus (
 
 _NS_EXPORT size_t MTL::IOCompressionContextDefaultChunkSize()
 {
-    return 64 * 1024;
+    return MTL::Private::MTLIOCompressionContextDefaultChunkSize();
 }
 
 _NS_EXPORT void* MTL::IOCreateCompressionContext(const char* path, IOCompressionMethod type, size_t chunkSize)

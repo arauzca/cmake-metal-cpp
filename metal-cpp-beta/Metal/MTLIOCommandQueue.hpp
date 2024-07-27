@@ -2,7 +2,7 @@
 //
 // Metal/MTLIOCommandQueue.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,8 +71,6 @@ class IOScratchBufferAllocator : public NS::Referencing<IOScratchBufferAllocator
 {
 public:
     class IOScratchBuffer* newScratchBuffer(NS::UInteger minimumSize);
-
-    class IOScratchBuffer* allocateScratchBuffer(NS::UInteger minimumSize);
 };
 
 class IOCommandQueueDescriptor : public NS::Copying<IOCommandQueueDescriptor>
@@ -106,6 +104,8 @@ public:
 };
 
 }
+
+_MTL_PRIVATE_DEF_WEAK_CONST(NS::ErrorDomain, IOErrorDomain);
 
 // method: enqueueBarrier
 _MTL_INLINE void MTL::IOCommandQueue::enqueueBarrier()
@@ -146,12 +146,6 @@ _MTL_INLINE MTL::Buffer* MTL::IOScratchBuffer::buffer() const
 _MTL_INLINE MTL::IOScratchBuffer* MTL::IOScratchBufferAllocator::newScratchBuffer(NS::UInteger minimumSize)
 {
     return Object::sendMessage<MTL::IOScratchBuffer*>(this, _MTL_PRIVATE_SEL(newScratchBufferWithMinimumSize_), minimumSize);
-}
-
-// method: allocateScratchBufferWithMinimumSize:
-_MTL_INLINE MTL::IOScratchBuffer* MTL::IOScratchBufferAllocator::allocateScratchBuffer(NS::UInteger minimumSize)
-{
-    return Object::sendMessage<MTL::IOScratchBuffer*>(this, _MTL_PRIVATE_SEL(allocateScratchBufferWithMinimumSize_), minimumSize);
 }
 
 // static method: alloc

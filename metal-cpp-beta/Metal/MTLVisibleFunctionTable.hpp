@@ -2,7 +2,7 @@
 //
 // Metal/MTLVisibleFunctionTable.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@
 
 #include <Foundation/Foundation.hpp>
 
-#include "MTLFunctionHandle.hpp"
 #include "MTLResource.hpp"
 #include "MTLTypes.hpp"
 
@@ -52,7 +51,7 @@ public:
 
     void            setFunction(const class FunctionHandle* function, NS::UInteger index);
 
-    void            setFunctions(const class FunctionHandle* functions[], NS::Range range);
+    void            setFunctions(const class FunctionHandle* const functions[], NS::Range range);
 };
 
 }
@@ -99,7 +98,7 @@ _MTL_INLINE void MTL::VisibleFunctionTable::setFunction(const MTL::FunctionHandl
 }
 
 // method: setFunctions:withRange:
-_MTL_INLINE void MTL::VisibleFunctionTable::setFunctions(const MTL::FunctionHandle* functions[], NS::Range range)
+_MTL_INLINE void MTL::VisibleFunctionTable::setFunctions(const MTL::FunctionHandle* const functions[], NS::Range range)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setFunctions_withRange_), functions, range);
 }

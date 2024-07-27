@@ -2,7 +2,7 @@
 //
 // Foundation/NSSharedPtr.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public:
      * Construction from another pointee type.
      */
     template <class _OtherClass>
-    SharedPtr(const SharedPtr<_OtherClass>& other) noexcept;
+    SharedPtr(const SharedPtr<_OtherClass>& other, typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>> * = nullptr) noexcept;
 
     /**
      * SharedPtr move constructor.
@@ -58,7 +58,7 @@ public:
      * Move from another pointee type.
      */
     template <class _OtherClass>
-    SharedPtr(SharedPtr<_OtherClass>&& other) noexcept;
+    SharedPtr(SharedPtr<_OtherClass>&& other, typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>> * = nullptr) noexcept;
 
     /**
      * Copy assignment operator.
@@ -71,7 +71,8 @@ public:
      * Copying increases reference count. Only releases previous pointee if objects are different.
      */
     template <class _OtherClass>
-    SharedPtr& operator=(const SharedPtr<_OtherClass>& other);
+    typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>, SharedPtr &>
+    operator=(const SharedPtr<_OtherClass>& other);
 
     /**
      * Move assignment operator.
@@ -84,7 +85,8 @@ public:
      * Move without affecting reference counts, unless pointees are equal. Moved-from object is reset to nullptr.
      */
     template <class _OtherClass>
-    SharedPtr& operator=(SharedPtr<_OtherClass>&& other);
+    typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>, SharedPtr &>
+    operator=(SharedPtr<_OtherClass>&& other);
 
     /**
      * Access raw pointee.
@@ -100,7 +102,7 @@ public:
     /**
      * Implicit cast to bool.
      */
-    operator bool() const;
+    explicit operator bool() const;
 
     /**
      * Reset this SharedPtr to null, decreasing the reference count.
@@ -157,7 +159,7 @@ _NS_INLINE NS::SharedPtr<_Class>::SharedPtr()
 }
 
 template <class _Class>
-_NS_INLINE NS::SharedPtr<_Class>::~SharedPtr()
+_NS_INLINE NS::SharedPtr<_Class>::~SharedPtr<_Class>()
 {
     if (m_pObject)
     {
@@ -173,7 +175,7 @@ _NS_INLINE NS::SharedPtr<_Class>::SharedPtr(const NS::SharedPtr<_Class>& other) 
 
 template <class _Class>
 template <class _OtherClass>
-_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(const NS::SharedPtr<_OtherClass>& other) noexcept
+_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(const NS::SharedPtr<_OtherClass>& other, typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>> *) noexcept
     : m_pObject(reinterpret_cast<_Class*>(other.get()->retain()))
 {
 }
@@ -187,7 +189,7 @@ _NS_INLINE NS::SharedPtr<_Class>::SharedPtr(NS::SharedPtr<_Class>&& other) noexc
 
 template <class _Class>
 template <class _OtherClass>
-_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(NS::SharedPtr<_OtherClass>&& other) noexcept
+_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(NS::SharedPtr<_OtherClass>&& other, typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>> *) noexcept
     : m_pObject(reinterpret_cast<_Class*>(other.get()))
 {
     other.detach();
@@ -225,7 +227,7 @@ _NS_INLINE void NS::SharedPtr<_Class>::detach()
 }
 
 template <class _Class>
-NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(const SharedPtr<_Class>& other)
+_NS_INLINE NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(const SharedPtr<_Class>& other)
 {
     if (m_pObject != other.m_pObject)
     {
@@ -240,7 +242,8 @@ NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(const SharedPtr<_Class>&
 
 template <class _Class>
 template <class _OtherClass>
-NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(const SharedPtr<_OtherClass>& other)
+typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>, NS::SharedPtr<_Class> &>
+_NS_INLINE NS::SharedPtr<_Class>::operator=(const SharedPtr<_OtherClass>& other)
 {
     if (m_pObject != other.get())
     {
@@ -254,7 +257,7 @@ NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(const SharedPtr<_OtherCl
 }
 
 template <class _Class>
-NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(SharedPtr<_Class>&& other)
+_NS_INLINE NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(SharedPtr<_Class>&& other)
 {
     if (m_pObject != other.m_pObject)
     {
@@ -275,7 +278,8 @@ NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(SharedPtr<_Class>&& othe
 
 template <class _Class>
 template <class _OtherClass>
-NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(SharedPtr<_OtherClass>&& other)
+typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>, NS::SharedPtr<_Class> &>
+_NS_INLINE NS::SharedPtr<_Class>::operator=(SharedPtr<_OtherClass>&& other)
 {
     if (m_pObject != other.get())
     {

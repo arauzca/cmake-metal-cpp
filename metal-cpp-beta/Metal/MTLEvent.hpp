@@ -2,7 +2,7 @@
 //
 // Metal/MTLEvent.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,6 +60,8 @@ public:
 
     class SharedEventHandle* newSharedEventHandle();
 
+    bool                     waitUntilSignaledValue(uint64_t value, uint64_t milliseconds);
+
     uint64_t                 signaledValue() const;
     void                     setSignaledValue(uint64_t signaledValue);
 };
@@ -73,10 +75,6 @@ public:
 
     NS::String*                     label() const;
 };
-
-struct SharedEventHandlePrivate
-{
-} _MTL_PACKED;
 
 }
 
@@ -131,6 +129,12 @@ _MTL_INLINE void MTL::SharedEvent::notifyListener(const MTL::SharedEventListener
 _MTL_INLINE MTL::SharedEventHandle* MTL::SharedEvent::newSharedEventHandle()
 {
     return Object::sendMessage<MTL::SharedEventHandle*>(this, _MTL_PRIVATE_SEL(newSharedEventHandle));
+}
+
+// method: waitUntilSignaledValue:timeoutMS:
+_MTL_INLINE bool MTL::SharedEvent::waitUntilSignaledValue(uint64_t value, uint64_t milliseconds)
+{
+    return Object::sendMessage<bool>(this, _MTL_PRIVATE_SEL(waitUntilSignaledValue_timeoutMS_), value, milliseconds);
 }
 
 // property: signaledValue

@@ -2,7 +2,7 @@
 //
 // Metal/MTLBuffer.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public:
     class Buffer*  remoteStorageBuffer() const;
 
     class Buffer*  newRemoteBufferViewForDevice(const class Device* device);
-    
+
     uint64_t       gpuAddress() const;
 };
 

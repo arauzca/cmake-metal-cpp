@@ -2,7 +2,7 @@
 //
 // Metal/MTLTexture.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -76,16 +76,13 @@ public:
     NS::String*                       label() const;
 };
 
-struct SharedTextureHandlePrivate
-{
-} _MTL_PACKED;
-
 _MTL_OPTIONS(NS::UInteger, TextureUsage) {
     TextureUsageUnknown = 0,
     TextureUsageShaderRead = 1,
     TextureUsageShaderWrite = 2,
     TextureUsageRenderTarget = 4,
     TextureUsagePixelFormatView = 16,
+    TextureUsageShaderAtomic = 32,
 };
 
 _MTL_ENUM(NS::Integer, TextureCompressionType) {
@@ -149,7 +146,7 @@ public:
     void                            setAllowGPUOptimizedContents(bool allowGPUOptimizedContents);
 
     MTL::TextureCompressionType     compressionType() const;
-    void                            setCompressionType( MTL::TextureCompressionType compressionType );
+    void                            setCompressionType(MTL::TextureCompressionType compressionType);
 
     MTL::TextureSwizzleChannels     swizzle() const;
     void                            setSwizzle(MTL::TextureSwizzleChannels swizzle);
@@ -446,12 +443,12 @@ _MTL_INLINE void MTL::TextureDescriptor::setAllowGPUOptimizedContents(bool allow
 // property: compressionType
 _MTL_INLINE MTL::TextureCompressionType MTL::TextureDescriptor::compressionType() const
 {
-    return Object::sendMessage<MTL::TextureCompressionType>(this, _MTL_PRIVATE_SEL(compressionType) );
+    return Object::sendMessage<MTL::TextureCompressionType>(this, _MTL_PRIVATE_SEL(compressionType));
 }
 
-_MTL_INLINE void MTL::TextureDescriptor::setCompressionType( MTL::TextureCompressionType compressionType )
+_MTL_INLINE void MTL::TextureDescriptor::setCompressionType(MTL::TextureCompressionType compressionType)
 {
-    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setCompressionType_), compressionType );
+    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setCompressionType_), compressionType);
 }
 
 // property: swizzle
@@ -612,7 +609,7 @@ _MTL_INLINE bool MTL::Texture::allowGPUOptimizedContents() const
 // property: compressionType
 _MTL_INLINE MTL::TextureCompressionType MTL::Texture::compressionType() const
 {
-    return Object::sendMessage<MTL::TextureCompressionType>(this, _MTL_PRIVATE_SEL(compressionType) );
+    return Object::sendMessage<MTL::TextureCompressionType>(this, _MTL_PRIVATE_SEL(compressionType));
 }
 
 // property: gpuResourceID

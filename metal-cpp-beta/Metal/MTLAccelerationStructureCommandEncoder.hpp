@@ -2,7 +2,7 @@
 //
 // Metal/MTLAccelerationStructureCommandEncoder.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@
 #include "MTLAccelerationStructureCommandEncoder.hpp"
 #include "MTLArgument.hpp"
 #include "MTLCommandEncoder.hpp"
-#include "MTLHeap.hpp"
-#include "MTLResource.hpp"
 
 namespace MTL
 {
@@ -62,11 +60,11 @@ public:
 
     void useResource(const class Resource* resource, MTL::ResourceUsage usage);
 
-    void useResources(MTL::Resource* resources[], NS::UInteger count, MTL::ResourceUsage usage);
+    void useResources(const class Resource* const resources[], NS::UInteger count, MTL::ResourceUsage usage);
 
     void useHeap(const class Heap* heap);
 
-    void useHeaps(MTL::Heap* heaps[], NS::UInteger count);
+    void useHeaps(const class Heap* const heaps[], NS::UInteger count);
 
     void sampleCountersInBuffer(const class CounterSampleBuffer* sampleBuffer, NS::UInteger sampleIndex, bool barrier);
 };
@@ -175,7 +173,7 @@ _MTL_INLINE void MTL::AccelerationStructureCommandEncoder::useResource(const MTL
 }
 
 // method: useResources:count:usage:
-_MTL_INLINE void MTL::AccelerationStructureCommandEncoder::useResources(MTL::Resource* resources[], NS::UInteger count, MTL::ResourceUsage usage)
+_MTL_INLINE void MTL::AccelerationStructureCommandEncoder::useResources(const MTL::Resource* const resources[], NS::UInteger count, MTL::ResourceUsage usage)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(useResources_count_usage_), resources, count, usage);
 }
@@ -187,7 +185,7 @@ _MTL_INLINE void MTL::AccelerationStructureCommandEncoder::useHeap(const MTL::He
 }
 
 // method: useHeaps:count:
-_MTL_INLINE void MTL::AccelerationStructureCommandEncoder::useHeaps(MTL::Heap* heaps[], NS::UInteger count)
+_MTL_INLINE void MTL::AccelerationStructureCommandEncoder::useHeaps(const MTL::Heap* const heaps[], NS::UInteger count)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(useHeaps_count_), heaps, count);
 }

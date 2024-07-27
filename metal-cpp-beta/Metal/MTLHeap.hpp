@@ -2,7 +2,7 @@
 //
 // Metal/MTLHeap.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@
 
 #include <Foundation/Foundation.hpp>
 
+#include "MTLAllocation.hpp"
 #include "MTLDevice.hpp"
 #include "MTLHeap.hpp"
 #include "MTLResource.hpp"
@@ -67,7 +68,7 @@ public:
     void                         setType(MTL::HeapType type);
 };
 
-class Heap : public NS::Referencing<Heap>
+class Heap : public NS::Referencing<Heap, Allocation>
 {
 public:
     NS::String*                  label() const;
@@ -93,7 +94,7 @@ public:
 
     class Buffer*                newBuffer(NS::UInteger length, MTL::ResourceOptions options);
 
-    class Texture*               newTexture(const class TextureDescriptor* desc);
+    class Texture*               newTexture(const class TextureDescriptor* descriptor);
 
     MTL::PurgeableState          setPurgeableState(MTL::PurgeableState state);
 
@@ -275,9 +276,9 @@ _MTL_INLINE MTL::Buffer* MTL::Heap::newBuffer(NS::UInteger length, MTL::Resource
 }
 
 // method: newTextureWithDescriptor:
-_MTL_INLINE MTL::Texture* MTL::Heap::newTexture(const MTL::TextureDescriptor* desc)
+_MTL_INLINE MTL::Texture* MTL::Heap::newTexture(const MTL::TextureDescriptor* descriptor)
 {
-    return Object::sendMessage<MTL::Texture*>(this, _MTL_PRIVATE_SEL(newTextureWithDescriptor_), desc);
+    return Object::sendMessage<MTL::Texture*>(this, _MTL_PRIVATE_SEL(newTextureWithDescriptor_), descriptor);
 }
 
 // method: setPurgeableState:

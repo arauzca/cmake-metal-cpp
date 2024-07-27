@@ -2,7 +2,7 @@
 //
 // Metal/MTLDevice.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -67,8 +67,8 @@ _MTL_ENUM(NS::UInteger, FeatureSet) {
     FeatureSet_OSX_GPUFamily1_v1 = 10000,
     FeatureSet_macOS_GPUFamily1_v2 = 10001,
     FeatureSet_OSX_GPUFamily1_v2 = 10001,
-    FeatureSet_OSX_ReadWriteTextureTier2 = 10002,
     FeatureSet_macOS_ReadWriteTextureTier2 = 10002,
+    FeatureSet_OSX_ReadWriteTextureTier2 = 10002,
     FeatureSet_macOS_GPUFamily1_v3 = 10003,
     FeatureSet_macOS_GPUFamily1_v4 = 10004,
     FeatureSet_macOS_GPUFamily2_v1 = 10005,
@@ -94,6 +94,7 @@ _MTL_ENUM(NS::Integer, GPUFamily) {
     GPUFamilyApple6 = 1006,
     GPUFamilyApple7 = 1007,
     GPUFamilyApple8 = 1008,
+    GPUFamilyApple9 = 1009,
     GPUFamilyMac1 = 2001,
     GPUFamilyMac2 = 2002,
     GPUFamilyCommon1 = 3001,
@@ -114,6 +115,7 @@ _MTL_ENUM(NS::UInteger, DeviceLocation) {
 _MTL_OPTIONS(NS::UInteger, PipelineOption) {
     PipelineOptionNone = 0,
     PipelineOptionArgumentInfo = 1,
+    PipelineOptionBindingInfo = 1,
     PipelineOptionBufferTypeInfo = 2,
     PipelineOptionFailOnBinaryArchiveMiss = 4,
 };
@@ -134,10 +136,10 @@ _MTL_ENUM(NS::UInteger, SparseTextureRegionAlignmentMode) {
     SparseTextureRegionAlignmentModeInward = 1,
 };
 
-_MTL_ENUM(NS::UInteger, SparsePageSize) {
-    SparsePageSize16 = 16,
-    SparsePageSize64 = 64,
-    SparsePageSize256 = 256,
+_MTL_ENUM(NS::Integer, SparsePageSize) {
+    SparsePageSize16 = 101,
+    SparsePageSize64 = 102,
+    SparsePageSize256 = 103,
 };
 
 struct AccelerationStructureSizes
@@ -179,8 +181,8 @@ public:
     NS::UInteger                     arrayLength() const;
     void                             setArrayLength(NS::UInteger arrayLength);
 
-    MTL::ArgumentAccess              access() const;
-    void                             setAccess(MTL::ArgumentAccess access);
+    MTL::BindingAccess               access() const;
+    void                             setAccess(MTL::BindingAccess access);
 
     MTL::TextureType                 textureType() const;
     void                             setTextureType(MTL::TextureType textureType);
@@ -189,13 +191,21 @@ public:
     void                             setConstantBlockAlignment(NS::UInteger constantBlockAlignment);
 };
 
+class Architecture : public NS::Copying<Architecture>
+{
+public:
+    static class Architecture* alloc();
+
+    class Architecture*        init();
+
+    NS::String*                name() const;
+};
+
 using DeviceNotificationName = NS::String*;
-
 _MTL_CONST(DeviceNotificationName, DeviceWasAddedNotification);
-
 _MTL_CONST(DeviceNotificationName, DeviceRemovalRequestedNotification);
-
 _MTL_CONST(DeviceNotificationName, DeviceWasRemovedNotification);
+_MTL_CONST(NS::ErrorUserInfoKey, CommandBufferEncoderInfoErrorKey);
 
 using DeviceNotificationHandlerBlock = void (^)(class Device* pDevice, DeviceNotificationName notifyName);
 
@@ -262,6 +272,8 @@ public:
 
     uint64_t                        registryID() const;
 
+    class Architecture*             architecture() const;
+
     MTL::Size                       maxThreadsPerThreadgroup() const;
 
     bool                            lowPower() const;
@@ -304,9 +316,13 @@ public:
 
     NS::UInteger                    currentAllocatedSize() const;
 
+    class LogState*                 newLogState(const class LogStateDescriptor* descriptor, NS::Error** error);
+
     class CommandQueue*             newCommandQueue();
 
     class CommandQueue*             newCommandQueue(NS::UInteger maxCommandBufferCount);
+
+    class CommandQueue*             newCommandQueue(const class CommandQueueDescriptor* descriptor);
 
     MTL::SizeAndAlign               heapTextureSizeAndAlign(const class TextureDescriptor* desc);
 
@@ -420,9 +436,13 @@ public:
 
     class IOFileHandle*             newIOHandle(const NS::URL* url, NS::Error** error);
 
+    class IOCommandQueue*           newIOCommandQueue(const class IOCommandQueueDescriptor* descriptor, NS::Error** error);
+
     class IOFileHandle*             newIOHandle(const NS::URL* url, MTL::IOCompressionMethod compressionMethod, NS::Error** error);
 
-    class IOCommandQueue*           newIOCommandQueue(const class IOCommandQueueDescriptor* descriptor, NS::Error** error);
+    class IOFileHandle*             newIOFileHandle(const NS::URL* url, NS::Error** error);
+
+    class IOFileHandle*             newIOFileHandle(const NS::URL* url, MTL::IOCompressionMethod compressionMethod, NS::Error** error);
 
     MTL::Size                       sparseTileSize(MTL::TextureType textureType, MTL::PixelFormat pixelFormat, NS::UInteger sampleCount);
 
@@ -479,6 +499,13 @@ public:
     bool                            supportsRaytracingFromRender() const;
 
     bool                            supportsPrimitiveMotionBlur() const;
+
+    bool                            shouldMaximizeConcurrentCompilation() const;
+    void                            setShouldMaximizeConcurrentCompilation(bool shouldMaximizeConcurrentCompilation);
+
+    NS::UInteger                    maximumConcurrentCompilationTaskCount() const;
+
+    class ResidencySet*             newResidencySet(const class ResidencySetDescriptor* desc, NS::Error** error);
 };
 
 }
@@ -535,12 +562,12 @@ _MTL_INLINE void MTL::ArgumentDescriptor::setArrayLength(NS::UInteger arrayLengt
 }
 
 // property: access
-_MTL_INLINE MTL::ArgumentAccess MTL::ArgumentDescriptor::access() const
+_MTL_INLINE MTL::BindingAccess MTL::ArgumentDescriptor::access() const
 {
-    return Object::sendMessage<MTL::ArgumentAccess>(this, _MTL_PRIVATE_SEL(access));
+    return Object::sendMessage<MTL::BindingAccess>(this, _MTL_PRIVATE_SEL(access));
 }
 
-_MTL_INLINE void MTL::ArgumentDescriptor::setAccess(MTL::ArgumentAccess access)
+_MTL_INLINE void MTL::ArgumentDescriptor::setAccess(MTL::BindingAccess access)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setAccess_), access);
 }
@@ -567,6 +594,29 @@ _MTL_INLINE void MTL::ArgumentDescriptor::setConstantBlockAlignment(NS::UInteger
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setConstantBlockAlignment_), constantBlockAlignment);
 }
 
+// static method: alloc
+_MTL_INLINE MTL::Architecture* MTL::Architecture::alloc()
+{
+    return NS::Object::alloc<MTL::Architecture>(_MTL_PRIVATE_CLS(MTLArchitecture));
+}
+
+// method: init
+_MTL_INLINE MTL::Architecture* MTL::Architecture::init()
+{
+    return NS::Object::init<MTL::Architecture>();
+}
+
+// property: name
+_MTL_INLINE NS::String* MTL::Architecture::name() const
+{
+    return Object::sendMessage<NS::String*>(this, _MTL_PRIVATE_SEL(name));
+}
+
+_MTL_PRIVATE_DEF_WEAK_CONST(MTL::DeviceNotificationName, DeviceWasAddedNotification);
+_MTL_PRIVATE_DEF_WEAK_CONST(MTL::DeviceNotificationName, DeviceRemovalRequestedNotification);
+_MTL_PRIVATE_DEF_WEAK_CONST(MTL::DeviceNotificationName, DeviceWasRemovedNotification);
+_MTL_PRIVATE_DEF_CONST(NS::ErrorUserInfoKey, CommandBufferEncoderInfoErrorKey);
+
 #if defined(MTL_PRIVATE_IMPLEMENTATION)
 
 extern "C" MTL::Device* MTLCreateSystemDefaultDevice();
@@ -586,11 +636,11 @@ _NS_EXPORT MTL::Device* MTL::CreateSystemDefaultDevice()
 
 _NS_EXPORT NS::Array* MTL::CopyAllDevices()
 {
-#if TARGET_OS_OSX
+#if (defined __IPHONE_18) || (defined __MAC_10_11)
     return ::MTLCopyAllDevices();
 #else
     return nullptr;
-#endif // TARGET_OS_OSX
+#endif // __IPHONE_18
 }
 
 _NS_EXPORT NS::Array* MTL::CopyAllDevicesWithObserver(NS::Object** pOutObserver, DeviceNotificationHandlerBlock handler)
@@ -614,6 +664,7 @@ _NS_EXPORT NS::Array* MTL::CopyAllDevicesWithObserver(NS::Object** pOutObserver,
 
 _NS_EXPORT void MTL::RemoveDeviceObserver(const NS::Object* pObserver)
 {
+    (void)pObserver;
 #if TARGET_OS_OSX
     ::MTLRemoveDeviceObserver(pObserver);
 #endif // TARGET_OS_OSX
@@ -692,6 +743,12 @@ _MTL_INLINE NS::String* MTL::Device::name() const
 _MTL_INLINE uint64_t MTL::Device::registryID() const
 {
     return Object::sendMessage<uint64_t>(this, _MTL_PRIVATE_SEL(registryID));
+}
+
+// property: architecture
+_MTL_INLINE MTL::Architecture* MTL::Device::architecture() const
+{
+    return Object::sendMessage<MTL::Architecture*>(this, _MTL_PRIVATE_SEL(architecture));
 }
 
 // property: maxThreadsPerThreadgroup
@@ -820,6 +877,12 @@ _MTL_INLINE NS::UInteger MTL::Device::currentAllocatedSize() const
     return Object::sendMessage<NS::UInteger>(this, _MTL_PRIVATE_SEL(currentAllocatedSize));
 }
 
+// method: newLogStateWithDescriptor:error:
+_MTL_INLINE MTL::LogState* MTL::Device::newLogState(const MTL::LogStateDescriptor* descriptor, NS::Error** error)
+{
+    return Object::sendMessage<MTL::LogState*>(this, _MTL_PRIVATE_SEL(newLogStateWithDescriptor_error_), descriptor, error);
+}
+
 // method: newCommandQueue
 _MTL_INLINE MTL::CommandQueue* MTL::Device::newCommandQueue()
 {
@@ -830,6 +893,12 @@ _MTL_INLINE MTL::CommandQueue* MTL::Device::newCommandQueue()
 _MTL_INLINE MTL::CommandQueue* MTL::Device::newCommandQueue(NS::UInteger maxCommandBufferCount)
 {
     return Object::sendMessage<MTL::CommandQueue*>(this, _MTL_PRIVATE_SEL(newCommandQueueWithMaxCommandBufferCount_), maxCommandBufferCount);
+}
+
+// method: newCommandQueueWithDescriptor:
+_MTL_INLINE MTL::CommandQueue* MTL::Device::newCommandQueue(const MTL::CommandQueueDescriptor* descriptor)
+{
+    return Object::sendMessage<MTL::CommandQueue*>(this, _MTL_PRIVATE_SEL(newCommandQueueWithDescriptor_), descriptor);
 }
 
 // method: heapTextureSizeAndAlignWithDescriptor:
@@ -1168,16 +1237,28 @@ _MTL_INLINE MTL::IOFileHandle* MTL::Device::newIOHandle(const NS::URL* url, NS::
     return Object::sendMessage<MTL::IOFileHandle*>(this, _MTL_PRIVATE_SEL(newIOHandleWithURL_error_), url, error);
 }
 
+// method: newIOCommandQueueWithDescriptor:error:
+_MTL_INLINE MTL::IOCommandQueue* MTL::Device::newIOCommandQueue(const MTL::IOCommandQueueDescriptor* descriptor, NS::Error** error)
+{
+    return Object::sendMessage<MTL::IOCommandQueue*>(this, _MTL_PRIVATE_SEL(newIOCommandQueueWithDescriptor_error_), descriptor, error);
+}
+
 // method: newIOHandleWithURL:compressionMethod:error:
 _MTL_INLINE MTL::IOFileHandle* MTL::Device::newIOHandle(const NS::URL* url, MTL::IOCompressionMethod compressionMethod, NS::Error** error)
 {
     return Object::sendMessage<MTL::IOFileHandle*>(this, _MTL_PRIVATE_SEL(newIOHandleWithURL_compressionMethod_error_), url, compressionMethod, error);
 }
 
-// method: newIOCommandQueueWithDescriptor:error:
-_MTL_INLINE MTL::IOCommandQueue* MTL::Device::newIOCommandQueue(const MTL::IOCommandQueueDescriptor* descriptor, NS::Error** error)
+// method: newIOFileHandleWithURL:error:
+_MTL_INLINE MTL::IOFileHandle* MTL::Device::newIOFileHandle(const NS::URL* url, NS::Error** error)
 {
-    return Object::sendMessage<MTL::IOCommandQueue*>(this, _MTL_PRIVATE_SEL(newIOCommandQueueWithDescriptor_error_), descriptor, error);
+    return Object::sendMessage<MTL::IOFileHandle*>(this, _MTL_PRIVATE_SEL(newIOFileHandleWithURL_error_), url, error);
+}
+
+// method: newIOFileHandleWithURL:compressionMethod:error:
+_MTL_INLINE MTL::IOFileHandle* MTL::Device::newIOFileHandle(const NS::URL* url, MTL::IOCompressionMethod compressionMethod, NS::Error** error)
+{
+    return Object::sendMessage<MTL::IOFileHandle*>(this, _MTL_PRIVATE_SEL(newIOFileHandleWithURL_compressionMethod_error_), url, compressionMethod, error);
 }
 
 // method: sparseTileSizeWithTextureType:pixelFormat:sampleCount:
@@ -1346,4 +1427,27 @@ _MTL_INLINE bool MTL::Device::supportsRaytracingFromRender() const
 _MTL_INLINE bool MTL::Device::supportsPrimitiveMotionBlur() const
 {
     return Object::sendMessageSafe<bool>(this, _MTL_PRIVATE_SEL(supportsPrimitiveMotionBlur));
+}
+
+// property: shouldMaximizeConcurrentCompilation
+_MTL_INLINE bool MTL::Device::shouldMaximizeConcurrentCompilation() const
+{
+    return Object::sendMessage<bool>(this, _MTL_PRIVATE_SEL(shouldMaximizeConcurrentCompilation));
+}
+
+_MTL_INLINE void MTL::Device::setShouldMaximizeConcurrentCompilation(bool shouldMaximizeConcurrentCompilation)
+{
+    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setShouldMaximizeConcurrentCompilation_), shouldMaximizeConcurrentCompilation);
+}
+
+// property: maximumConcurrentCompilationTaskCount
+_MTL_INLINE NS::UInteger MTL::Device::maximumConcurrentCompilationTaskCount() const
+{
+    return Object::sendMessage<NS::UInteger>(this, _MTL_PRIVATE_SEL(maximumConcurrentCompilationTaskCount));
+}
+
+// method: newResidencySetWithDescriptor:error:
+_MTL_INLINE MTL::ResidencySet* MTL::Device::newResidencySet(const MTL::ResidencySetDescriptor* desc, NS::Error** error)
+{
+    return Object::sendMessage<MTL::ResidencySet*>(this, _MTL_PRIVATE_SEL(newResidencySetWithDescriptor_error_), desc, error);
 }

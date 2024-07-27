@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 //
-// Foundation/NSDate.hpp
+// Metal/MTLVersion.hpp
 //
 // Copyright 2020-2024 Apple Inc.
 //
@@ -18,36 +18,15 @@
 //
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 #pragma once
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#include "NSDefines.hpp"
-#include "NSObject.hpp"
-#include "NSPrivate.hpp"
-#include "NSTypes.hpp"
+#define METALCPP_VERSION_MAJOR 366
+#define METALCPP_VERSION_MINOR 11
+#define METALCPP_VERSION_PATCH 0
 
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-namespace NS
-{
-
-using TimeInterval = double;
-
-class Date : public Copying<Date>
-{
-public:
-    static Date* dateWithTimeIntervalSinceNow(TimeInterval secs);
-};
-
-} // NS
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-_NS_INLINE NS::Date* NS::Date::dateWithTimeIntervalSinceNow(NS::TimeInterval secs)
-{
-    return NS::Object::sendMessage<NS::Date*>(_NS_PRIVATE_CLS(NSDate), _NS_PRIVATE_SEL(dateWithTimeIntervalSinceNow_), secs);
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+#define METALCPP_SUPPORTS_VERSION(major, minor, patch) \
+    ((major < METALCPP_VERSION_MAJOR) || \
+    (major == METALCPP_VERSION_MAJOR && minor < METALCPP_VERSION_MINOR) || \
+    (major == METALCPP_VERSION_MAJOR && minor == METALCPP_VERSION_MINOR && patch <= METALCPP_VERSION_PATCH))

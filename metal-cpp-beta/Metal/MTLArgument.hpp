@@ -2,7 +2,7 @@
 //
 // Metal/MTLArgument.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -123,6 +123,10 @@ _MTL_ENUM(NS::UInteger, DataType) {
     DataTypeIntersectionFunctionTable = 116,
     DataTypePrimitiveAccelerationStructure = 117,
     DataTypeInstanceAccelerationStructure = 118,
+    DataTypeBFloat = 121,
+    DataTypeBFloat2 = 122,
+    DataTypeBFloat3 = 123,
+    DataTypeBFloat4 = 124,
 };
 
 _MTL_ENUM(NS::Integer, BindingType) {
@@ -152,7 +156,10 @@ _MTL_ENUM(NS::UInteger, ArgumentType) {
     ArgumentTypeIntersectionFunctionTable = 27,
 };
 
-_MTL_ENUM(NS::UInteger, ArgumentAccess) {
+_MTL_ENUM(NS::UInteger, BindingAccess) {
+    BindingAccessReadOnly = 0,
+    BindingAccessReadWrite = 1,
+    BindingAccessWriteOnly = 2,
     ArgumentAccessReadOnly = 0,
     ArgumentAccessReadWrite = 1,
     ArgumentAccessWriteOnly = 2,
@@ -237,7 +244,7 @@ public:
 
     MTL::DataType             elementType() const;
 
-    MTL::ArgumentAccess       access() const;
+    MTL::BindingAccess        access() const;
 
     NS::UInteger              alignment() const;
 
@@ -261,7 +268,7 @@ public:
 
     MTL::TextureType                   textureType() const;
 
-    MTL::ArgumentAccess                access() const;
+    MTL::BindingAccess                 access() const;
 
     bool                               isDepthTexture() const;
 };
@@ -277,7 +284,7 @@ public:
 
     MTL::ArgumentType      type() const;
 
-    MTL::ArgumentAccess    access() const;
+    MTL::BindingAccess     access() const;
 
     NS::UInteger           index() const;
 
@@ -304,50 +311,64 @@ public:
     bool                   isDepthTexture() const;
 
     NS::UInteger           arrayLength() const;
-
-    NS::UInteger           objectPayloadAlignment() const;
-
-    NS::UInteger           objectPayloadDataSize() const;
 };
 
 class Binding : public NS::Referencing<Binding>
 {
 public:
-    NS::String*         name() const;
-    MTL::BindingType    type() const;
-    MTL::ArgumentAccess access() const;
-    NS::UInteger        index() const;
-    bool                used() const;
-    bool                argument() const;
+    NS::String*        name() const;
+
+    MTL::BindingType   type() const;
+
+    MTL::BindingAccess access() const;
+
+    NS::UInteger       index() const;
+
+    bool               used() const;
+
+    bool               argument() const;
 };
 
 class BufferBinding : public NS::Referencing<BufferBinding, Binding>
 {
-    NS::UInteger        bufferAlignment() const;
-    NS::UInteger        bufferDataSize() const;
-    MTL::DataType       bufferDataType() const;
-    MTL::StructType*    bufferStructType() const;
-    MTL::PointerType*   bufferPointerType() const;
+public:
+    NS::UInteger       bufferAlignment() const;
+
+    NS::UInteger       bufferDataSize() const;
+
+    MTL::DataType      bufferDataType() const;
+
+    class StructType*  bufferStructType() const;
+
+    class PointerType* bufferPointerType() const;
 };
 
 class ThreadgroupBinding : public NS::Referencing<ThreadgroupBinding, Binding>
 {
-    NS::UInteger        threadgroupMemoryAlignment() const;
-    NS::UInteger        threadgroupMemoryDataSize() const;
+public:
+    NS::UInteger threadgroupMemoryAlignment() const;
+
+    NS::UInteger threadgroupMemoryDataSize() const;
 };
 
 class TextureBinding : public NS::Referencing<TextureBinding, Binding>
 {
-    MTL::TextureType    textureType() const;
-    MTL::DataType       textureDataType() const;
-    bool                depthTexture() const;
-    NS::UInteger        arrayLength() const;
+public:
+    MTL::TextureType textureType() const;
+
+    MTL::DataType    textureDataType() const;
+
+    bool             depthTexture() const;
+
+    NS::UInteger     arrayLength() const;
 };
 
 class ObjectPayloadBinding : public NS::Referencing<ObjectPayloadBinding, Binding>
 {
-    NS::UInteger        objectPayloadAlignment() const;
-    NS::UInteger        objectPayloadDataSize() const;
+public:
+    NS::UInteger objectPayloadAlignment() const;
+
+    NS::UInteger objectPayloadDataSize() const;
 };
 
 }
@@ -533,9 +554,9 @@ _MTL_INLINE MTL::DataType MTL::PointerType::elementType() const
 }
 
 // property: access
-_MTL_INLINE MTL::ArgumentAccess MTL::PointerType::access() const
+_MTL_INLINE MTL::BindingAccess MTL::PointerType::access() const
 {
-    return Object::sendMessage<MTL::ArgumentAccess>(this, _MTL_PRIVATE_SEL(access));
+    return Object::sendMessage<MTL::BindingAccess>(this, _MTL_PRIVATE_SEL(access));
 }
 
 // property: alignment
@@ -593,9 +614,9 @@ _MTL_INLINE MTL::TextureType MTL::TextureReferenceType::textureType() const
 }
 
 // property: access
-_MTL_INLINE MTL::ArgumentAccess MTL::TextureReferenceType::access() const
+_MTL_INLINE MTL::BindingAccess MTL::TextureReferenceType::access() const
 {
-    return Object::sendMessage<MTL::ArgumentAccess>(this, _MTL_PRIVATE_SEL(access));
+    return Object::sendMessage<MTL::BindingAccess>(this, _MTL_PRIVATE_SEL(access));
 }
 
 // property: isDepthTexture
@@ -629,9 +650,9 @@ _MTL_INLINE MTL::ArgumentType MTL::Argument::type() const
 }
 
 // property: access
-_MTL_INLINE MTL::ArgumentAccess MTL::Argument::access() const
+_MTL_INLINE MTL::BindingAccess MTL::Argument::access() const
 {
-    return Object::sendMessage<MTL::ArgumentAccess>(this, _MTL_PRIVATE_SEL(access));
+    return Object::sendMessage<MTL::BindingAccess>(this, _MTL_PRIVATE_SEL(access));
 }
 
 // property: index
@@ -712,18 +733,6 @@ _MTL_INLINE NS::UInteger MTL::Argument::arrayLength() const
     return Object::sendMessage<NS::UInteger>(this, _MTL_PRIVATE_SEL(arrayLength));
 }
 
-// property: objectPayloadAlignment
-_MTL_INLINE NS::UInteger MTL::Argument::objectPayloadAlignment() const
-{
-    return Object::sendMessage<NS::UInteger>(this, _MTL_PRIVATE_SEL(objectPayloadAlignment));
-}
-
-// property: objectPayloadDataSize
-_MTL_INLINE NS::UInteger MTL::Argument::objectPayloadDataSize() const
-{
-    return Object::sendMessage<NS::UInteger>(this, _MTL_PRIVATE_SEL(objectPayloadDataSize));
-}
-
 // property: name
 _MTL_INLINE NS::String* MTL::Binding::name() const
 {
@@ -737,9 +746,9 @@ _MTL_INLINE MTL::BindingType MTL::Binding::type() const
 }
 
 // property: access
-_MTL_INLINE MTL::ArgumentAccess MTL::Binding::access() const
+_MTL_INLINE MTL::BindingAccess MTL::Binding::access() const
 {
-    return Object::sendMessage<MTL::ArgumentAccess>(this, _MTL_PRIVATE_SEL(access));
+    return Object::sendMessage<MTL::BindingAccess>(this, _MTL_PRIVATE_SEL(access));
 }
 
 // property: index

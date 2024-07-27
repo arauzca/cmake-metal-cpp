@@ -2,7 +2,7 @@
 //
 // Metal/MTLIOCommandBuffer.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public:
 
     void          addCompletedHandler(const MTL::IOCommandBufferHandler block);
 
-    void          loadBytes(void* pointer, NS::UInteger size, const class IOFileHandle* sourceHandle, NS::UInteger sourceHandleOffset);
+    void          loadBytes(const void* pointer, NS::UInteger size, const class IOFileHandle* sourceHandle, NS::UInteger sourceHandleOffset);
 
     void          loadBuffer(const class Buffer* buffer, NS::UInteger offset, NS::UInteger size, const class IOFileHandle* sourceHandle, NS::UInteger sourceHandleOffset);
 
@@ -65,7 +65,7 @@ public:
 
     void          addBarrier();
 
-    void          pushDebugGroup( const NS::String* string );
+    void          pushDebugGroup(const NS::String* string);
 
     void          popDebugGroup();
 
@@ -99,7 +99,7 @@ _MTL_INLINE void MTL::IOCommandBuffer::addCompletedHandler(const MTL::IOCommandB
 }
 
 // method: loadBytes:size:sourceHandle:sourceHandleOffset:
-_MTL_INLINE void MTL::IOCommandBuffer::loadBytes(void* pointer, NS::UInteger size, const class IOFileHandle* sourceHandle, NS::UInteger sourceHandleOffset)
+_MTL_INLINE void MTL::IOCommandBuffer::loadBytes(const void* pointer, NS::UInteger size, const MTL::IOFileHandle* sourceHandle, NS::UInteger sourceHandleOffset)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(loadBytes_size_sourceHandle_sourceHandleOffset_), pointer, size, sourceHandle, sourceHandleOffset);
 }
@@ -147,12 +147,12 @@ _MTL_INLINE void MTL::IOCommandBuffer::addBarrier()
 }
 
 // method: pushDebugGroup:
-_MTL_INLINE void MTL::IOCommandBuffer::pushDebugGroup( const NS::String* string )
+_MTL_INLINE void MTL::IOCommandBuffer::pushDebugGroup(const NS::String* string)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(pushDebugGroup_), string);
 }
 
-// method: popDebugGroup:
+// method: popDebugGroup
 _MTL_INLINE void MTL::IOCommandBuffer::popDebugGroup()
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(popDebugGroup));

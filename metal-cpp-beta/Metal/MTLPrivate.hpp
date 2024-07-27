@@ -2,7 +2,7 @@
 //
 // Metal/MTLPrivate.hpp
 //
-// Copyright 2020-2022 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,19 +60,8 @@
     using Fn##name = signature; \
     Fn##name name = reinterpret_cast< Fn##name >( dlsym( RTLD_DEFAULT, #name ) )
 
-#if defined(__MAC_10_16) || defined(__MAC_11_0) || defined(__MAC_12_0) || defined(__MAC_13_0) || defined(__IPHONE_14_0) || defined(__IPHONE_15_0) || defined(__IPHONE_16_0) || defined(__TVOS_14_0) || defined(__TVOS_15_0) || defined(__TVOS_16_0)
-
-#define _MTL_PRIVATE_DEF_STR(type, symbol)                  \
-    _MTL_EXTERN type const MTL##symbol _MTL_PRIVATE_IMPORT; \
-    type const                         MTL::symbol = (nullptr != &MTL##symbol) ? MTL##symbol : nullptr
-
-#else
-
-namespace MTL
+namespace MTL::Private
 {
-namespace Private
-{
-
     template <typename _Type>
     inline _Type const LoadSymbol(const char* pSymbol)
     {
@@ -80,15 +69,35 @@ namespace Private
 
         return pAddress ? *pAddress : nullptr;
     }
+} // MTL::Private
 
-} // Private
-} // MTL
+#if defined(__MAC_15_0) || defined(__IPHONE_18_0) || defined(__TVOS_18_0)
+
+#define _MTL_PRIVATE_DEF_STR(type, symbol)                  \
+    _MTL_EXTERN type const MTL##symbol _MTL_PRIVATE_IMPORT; \
+    type const                         MTL::symbol = (nullptr != &MTL##symbol) ? MTL##symbol : nullptr
+
+#define _MTL_PRIVATE_DEF_CONST(type, symbol)              \
+    _MTL_EXTERN type const MTL##symbol _MTL_PRIVATE_IMPORT; \
+    type const                         MTL::symbol = (nullptr != &MTL##symbol) ? MTL##symbol : nullptr
+
+#define _MTL_PRIVATE_DEF_WEAK_CONST(type, symbol) \
+    _MTL_EXTERN type const MTL##symbol;    \
+    type const             MTL::symbol = Private::LoadSymbol<type>("MTL" #symbol)
+
+#else
 
 #define _MTL_PRIVATE_DEF_STR(type, symbol) \
     _MTL_EXTERN type const MTL##symbol;    \
     type const             MTL::symbol = Private::LoadSymbol<type>("MTL" #symbol)
 
-#endif // defined(__MAC_10_16) || defined(__MAC_11_0) || defined(__MAC_12_0) || defined(__MAC_13_0) || defined(__IPHONE_14_0) || defined(__IPHONE_15_0) || defined(__IPHONE_16_0) || defined(__TVOS_14_0) || defined(__TVOS_15_0) || defined(__TVOS_16_0)
+#define _MTL_PRIVATE_DEF_CONST(type, symbol) \
+    _MTL_EXTERN type const MTL##symbol;    \
+    type const             MTL::symbol = Private::LoadSymbol<type>("MTL" #symbol)
+
+#define _MTL_PRIVATE_DEF_WEAK_CONST(type, symbol) _MTL_PRIVATE_DEF_CONST(type, symbol)
+
+#endif // defined(__MAC_15_0) || defined(__IPHONE_18_0) || defined(__TVOS_18_0)
 
 #else
 
@@ -96,6 +105,8 @@ namespace Private
 #define _MTL_PRIVATE_DEF_PRO(symbol) extern void* s_k##symbol
 #define _MTL_PRIVATE_DEF_SEL(accessor, symbol) extern SEL s_k##accessor
 #define _MTL_PRIVATE_DEF_STR(type, symbol) extern type const MTL::symbol
+#define _MTL_PRIVATE_DEF_CONST(type, symbol) extern type const MTL::symbol
+#define _MTL_PRIVATE_DEF_WEAK_CONST(type, symbol) extern type const MTL::symbol
 
 #endif // MTL_PRIVATE_IMPLEMENTATION
 
