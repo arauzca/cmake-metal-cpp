@@ -1,63 +1,62 @@
-# [<img src="/assets/cmake.svg" style="height:30px;" />](https://cmake.org "CMake") cmake metal-cpp
+# [<img src="/assets/cmake.svg" style="height:30px;" />](https://cmake.org "CMake") cmake-metal-cpp
 
 ## About
 
-**metal-cpp** is a low overhead and header only C++ interface for Metal that helps developers add Metal functionality to graphics applications that are written in C++ (such as game engines). **metal-cpp** removes the need to create a shim and allows developers to call Metal functions directly from anywhere in their existing C++ code.
+**metal-cpp** is a low-overhead, header-only C++ interface for Metal that helps developers add Metal functionality to graphics applications written in C++ (such as game engines). **metal-cpp** eliminates the need to create a shim, allowing developers to call Metal functions directly from their existing C++ code.
 
-**cmake-metal-cpp** provides a way to integrate **metal-cpp** to projects using CMake. The project can be configured to provide the headers of Metal-cpp or to automatically create a single header file using the script provided by Apple.
+**cmake-metal-cpp** integrates **metal-cpp** with projects using CMake. The project can be configured to provide the Metal-cpp headers or automatically create a single header file using the script provided by Apple.
 
-## How to build
+## How to Build
 
-- Clone this project to the source of your project or add it as [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
-- In your `CMakeLists.txt` file add:
+1. Clone this project into your source directory or add it as a [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+2. In your `CMakeLists.txt` file, add:
 
-```cmake
-add_subdirectory(cmake-metal-cpp)
-```
+    ```cmake
+    add_subdirectory(cmake-metal-cpp)
+    ```
 
-- Add the  compile definitions and link the library provided by **cmake-metal-cpp**. For instance if you have an executable `my-target`:
+3. Add the compile definitions and link the library provided by **cmake-metal-cpp**. For instance, if you have an executable `my-target`:
 
-```cmake
-target_link_libraries(my-target metal-cpp)
-```
+    ```cmake
+    target_link_libraries(my-target metal-cpp)
+    ```
 
 ## Options
 
-This project provides two different options for the creation of the headers, individual headers or a single header file. The extensions AppKit and MetalKit, which are enabled by default can be excluded.
+This project provides two options for header creation: individual headers or a single header file. The AppKit and MetalKit extensions are enabled by default but can be excluded.
 
-- `MAKE_METAL_SINGLE_HEADER`: Use metal-cpp as a single-header include in your project. Default value: `OFF`.
-- `INCLUDE_APPKIT_EXTENSION`: Include the AppKit extension from metal-cpp-extensions. Default value: `ON`.
-- `INCLUDE_METALKIT_EXTENSION`: Include the MetalKit extension from metal-cpp-extensions. Default value: `ON`.
-- `ENABLE_BETA`: For beta developers targeting macOS13. Defatul value: `OFF`.
+- `MAKE_METAL_SINGLE_HEADER`: Use metal-cpp as a single-header include in your project. Default: `OFF`.
+- `INCLUDE_APPKIT_EXTENSION`: Include the AppKit extension from metal-cpp-extensions. Default: `ON`.
+- `INCLUDE_METALKIT_EXTENSION`: Include the MetalKit extension from metal-cpp-extensions. Default: `ON`.
+- `ENABLE_BETA`: For beta developers targeting macOS 13. Default: `OFF`.
 
-## How to use the headers
+## How to Use the Headers
 
-In your source code you only need to add the headers (or header if the single header option is on) and start coding.
+In your source code, add the headers (or header, if using the single header option) and start coding.
 
 - Individual headers:
 
-```c++
-#include <Metal/Metal.hpp>
-#include <AppKit/AppKit.hpp>
-#include <MetalKit/MetalKit.hpp>
-```
+    ```cpp
+    #include <Metal/Metal.hpp>
+    #include <AppKit/AppKit.hpp>
+    #include <MetalKit/MetalKit.hpp>
+    ```
 
 - Single header file:
 
-```c++
-#include <Metal.hpp>
-```
+    ```cpp
+    #include <Metal.hpp>
+    ```
 
 ## Credits
 
-**CMake Logo**: Cmake team. The original uploader was [Francesco Betti Sorbelli](https://it.wikipedia.org/wiki/Utente:Francesco_Betti_Sorbelli) at [Italian Wikipedia](https://it.wikipedia.org/wiki/Pagina_principale). Vectorized by Magasjukur2 [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+- **CMake Logo**: Created by the CMake team. Original uploader was [Francesco Betti Sorbelli](https://it.wikipedia.org/wiki/Utente:Francesco_Betti_Sorbelli) on [Italian Wikipedia](https://it.wikipedia.org/wiki/Pagina_principale). Vectorized by Magasjukur2 [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
 
-**metal-cpp**: Copyright © 2021 Apple Inc.
-
-**metal-cpp-beta**: Copyright © 2022 Apple Inc.
-
-**metal-cpp-extensions**: Copyright © 2021 Apple Inc.
+- **metal-cpp**: Copyright 2020-2023 Apple Inc.
+- **metal-cpp-beta**: Copyright 2020-2024 Apple Inc.
+- **metal-cpp-extensions**: Copyright 2020-2021 Apple Inc.
 
 ## Disclaimer
 
-I do not own any of the **metal-cpp** works, however the single header file generated by the script provided by Apple can be slightly different because I use a script to remove unnecessary imports from the AppKit and MetalKit header extensions.
+I do not own any of the **metal-cpp** works. However, the single header file generated by the script provided by Apple may be slightly different because I use a script to remove unnecessary imports from the AppKit and MetalKit header extensions.
+
