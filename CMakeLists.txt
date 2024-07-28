@@ -21,6 +21,7 @@ project(
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 if(APPLE)
     set(CMAKE_MACOSX_RPATH OFF)
@@ -47,12 +48,14 @@ if(MAKE_METAL_SINGLE_HEADER)
              "${METAL_CPP_DIR}/Metal/Metal.hpp")
 
         if(INCLUDE_APPKIT_EXTENSION)
-            file(COPY "${METAL_CPP_EXTENSIONS_DIR}/AppKit" DESTINATION "${METAL_CPP_DIR}/")
+            file(COPY "${METAL_CPP_EXTENSIONS_DIR}/AppKit"
+                 DESTINATION "${METAL_CPP_DIR}/")
             list(APPEND HEADERS "${METAL_CPP_DIR}/AppKit/AppKit.hpp")
         endif()
-            
+
         if(INCLUDE_METALKIT_EXTENSION)
-            file(COPY "${METAL_CPP_EXTENSIONS_DIR}/MetalKit" DESTINATION "${METAL_CPP_DIR}/")
+            file(COPY "${METAL_CPP_EXTENSIONS_DIR}/MetalKit"
+                 DESTINATION "${METAL_CPP_DIR}/")
             list(APPEND HEADERS "${METAL_CPP_DIR}/MetalKit/MetalKit.hpp")
         endif()
 
@@ -87,18 +90,17 @@ if(${MAKE_METAL_SINGLE_HEADER} AND EXISTS "${METAL_CPP_DIR}/SingleHeader/Metal.h
 
     # Remove unnecessary  headers.
     execute_process(
-        COMMAND python3 "${CMAKE_CURRENT_LIST_DIR}/scripts/RemoveUselessImports.py" "${METAL_CPP_DIR}/SingleHeader/Metal.hpp"
+        COMMAND python3 "${CMAKE_CURRENT_LIST_DIR}/scripts/RemoveUselessImports.py"
+                "${METAL_CPP_DIR}/SingleHeader/Metal.hpp"
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         RESULT_VARIABLE EXIT_CODE2
         OUTPUT_QUIET)
 
     if(NOT ${EXIT_CODE1} EQUAL 0 OR NOT ${EXIT_CODE2} EQUAL 0)
         message(
-            FATAL_ERROR
-                "An error has ocurred: the script did not successfully complete.")
+            FATAL_ERROR "An error has ocurred: the script did not successfully complete.")
     else()
-        message(
-            STATUS "Single header created: ${METAL_CPP_DIR}/SingleHeader/Metal.hpp")
+        message(STATUS "Single header created: ${METAL_CPP_DIR}/SingleHeader/Metal.hpp")
     endif()
 
 else(NOT ${MAKE_METAL_SINGLE_HEADER})
